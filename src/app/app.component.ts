@@ -114,7 +114,7 @@ export class AppComponent implements OnInit
   async getModifiedMobilenet()
   {
     const trainableLayers = ['denseModified','conv_pw_13_bn','conv_pw_13','conv_dw_13_bn','conv_dw_13'];
-    const mobilenet =  await tf.loadLayersModel('https://storage.googleapis.com/tfjs-models/tfjs/mobilenet_v1_0.25_224/model.json');
+    const mobilenet =  await tf.loadModel('https://storage.googleapis.com/tfjs-models/tfjs/mobilenet_v1_0.25_224/model.json');
     console.log('Mobilenet model is loaded')
 
     const x=mobilenet.getLayer('global_average_pooling2d_1');
@@ -298,7 +298,7 @@ export class AppComponent implements OnInit
   {
     // Reads the image as a Tensor from the <image> element.
     this.picture = <HTMLImageElement> document.getElementById(imgId);
-    const trainImage = tf.browser.fromPixels(this.picture);
+    const trainImage = tf.fromPixels(this.picture);
 
     // Normalize the image between -1 and 1. The image comes in between 0-255,
     // so we divide by 127 and subtract 1.
