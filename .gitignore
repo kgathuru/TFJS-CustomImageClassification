@@ -1,4 +1,6 @@
 .DS_STORE
+/src/assets/Parasitized/
+/src/assets/Uninfected/
 
 /dist/
 /bazel-out
