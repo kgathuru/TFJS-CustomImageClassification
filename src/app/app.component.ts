@@ -1,11 +1,13 @@
-//-------------------------------------------------------------
-// importes tfjs and Angular Material classes
-//-------------------------------------------------------------
 import { Component, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
 import * as tf from '@tensorflow/tfjs';
 import { categoricalCrossentropy } from '@tensorflow/tfjs-layers/dist/exports_metrics';
-import { MatTable, MatPaginator, MatTableDataSource } from '@angular/material';
-import { MatSnackBar } from '@angular/material';
+import { MatTable, MatTableDataSource } from '@angular/material/table';
+import { MatPaginator } from '@angular/material/paginator';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatTabsModule } from '@angular/material/tabs';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatDividerModule } from '@angular/material/divider';
+
 //-------------------------------------------------------------
 // defines 'TrainingImageList' interface to store training dataset
 //-------------------------------------------------------------
@@ -15,6 +17,7 @@ export interface TrainingImageList {
   LabelX2: number;
   Class: string;
 };
+
 //-------------------------------------------------------------
 // defines 'TrainingMetrics' interface to store training metrics
 //-------------------------------------------------------------
@@ -23,24 +26,18 @@ export interface TrainingMetrics {
   ce: number; // cross entropy value 
   loss: number; // loss function value 
 };
-//-------------------------------------------------------------
-@Component
-  ({
-    selector: 'app-root',
-    templateUrl: './app.component.html',
-    styleUrls: ['./app.component.css'],
-    encapsulation: ViewEncapsulation.None
-  })
-//-------------------------------------------------------------
-// 'AppComponent' class
-//-------------------------------------------------------------
+
+
+@Component({
+  selector: 'app-root',
+  templateUrl: './app.component.html',
+  styleUrls: ['./app.component.css']
+})
 export class AppComponent implements OnInit {
-  private isImagesListed: Boolean;
-  private isImagesListPerformed: Boolean;
+  private isImagesListed!: Boolean;
+  private isImagesListPerformed!: Boolean;
 
-  constructor(private snackBar: MatSnackBar) { }
-
-  private picture: HTMLImageElement;
+  private picture!: HTMLImageElement;
 
   public tableRows: TrainingImageList[] = []; //instance of TrainingImageList 
   public dataSource = new MatTableDataSource<TrainingImageList>(this.tableRows);  //datasourse as
@@ -53,15 +50,16 @@ export class AppComponent implements OnInit {
   private label_x1: number[] = [];
   private label_x2: number[] = [];
 
-  public ProgressBarValue: number;
+  public ProgressBarValue: number = 0;
 
-  @ViewChild(MatTable, { static: false }) table: MatTable<any>;
-  @ViewChild(MatPaginator, { static: false }) paginator: MatPaginator;
+  @ViewChild(MatTable, { static: false }) table!: MatTable<any>;
+  @ViewChild(MatPaginator, { static: false }) paginator!: MatPaginator;
+
+  constructor(private snackBar: MatSnackBar, private papa: Papa) { }
 
   ngOnInit() {
     this.isImagesListed = false;
     this.isImagesListPerformed = false;
-    this.ProgressBarValue = 0;
   }
 
   //-------------------------------------------------------------
@@ -129,7 +127,7 @@ export class AppComponent implements OnInit {
   // freezes mobilenet layers to make them untrainable
   // just keeps final layers trainable with argument trainableLayers
   //-------------------------------------------------------------
-  freezeModelLayers(trainableLayers, mobilenetModified) {
+  freezeModelLayers(trainableLayers: any, mobilenetModified: any) {
     for (const layer of mobilenetModified.layers) {
       layer.trainable = false;
       for (const tobeTrained of trainableLayers) {
@@ -146,8 +144,8 @@ export class AppComponent implements OnInit {
   // finetunes the modified mobilenet model in 5 training batches
   // takes model, images and targets as arguments
   //-------------------------------------------------------------
-  async fineTuneModifiedModel(model, images, targets) {
-    function onBatchEnd(batch, logs) {
+  async fineTuneModifiedModel(model: any, images: any, targets: any) {
+    function onBatchEnd(batch: any, logs: any) {
       console.log('Accuracy', logs.acc);
       console.log('CrossEntropy', logs.ce);
       console.log('All', logs);
@@ -161,7 +159,7 @@ export class AppComponent implements OnInit {
         validationSplit: 0.2,
         callbacks: { onBatchEnd }
 
-      }).then(info => {
+      }).then((info: any) => {
         console.log
         console.log('Final accuracy', info.history.acc);
         console.log('Cross entropy', info.ce);
@@ -240,7 +238,7 @@ export class AppComponent implements OnInit {
   // input tensor is produced from 224x224x3 image in HTMLImageElement
   // target tensor shape2 is produced from the class definition
   //-------------------------------------------------------------
-  generateData(trainData, batchSize) {
+  generateData(trainData: any, batchSize: number) {
     const imageTensors = [];
     const targetTensors = [];
 
@@ -276,7 +274,7 @@ export class AppComponent implements OnInit {
   // converts images in HTMLImageElement into the tensors
   // takes Image In in HTML as argument
   //-------------------------------------------------------------
-  capture(imgId) {
+  capture(imgId: any) {
     // Reads the image as a Tensor from the <image> element.
     this.picture = <HTMLImageElement>document.getElementById(imgId);
     const trainImage = tf.browser.fromPixels(this.picture);
@@ -292,12 +290,13 @@ export class AppComponent implements OnInit {
   // onFileLoad and onFileSelect functions opens file browser 
   // and stores the selected CVS file content in csvContent variable
   //-------------------------------------------------------------
-  onFileLoad(fileLoadedEvent) {
+  onFileLoad(fileLoadedEvent: any) {
     const textFromFileLoaded = fileLoadedEvent.target.result;
     this.csvContent = textFromFileLoaded;
   }
 
-  onFileSelect(input: HTMLInputElement) {
+  onFileSelect(event: Event) {
+    const input: HTMLInputElement = <HTMLInputElement>event.target;
     const files = input.files;
 
     if (files && files.length) {
@@ -307,6 +306,7 @@ export class AppComponent implements OnInit {
       fileReader.onload = (event: Event) => {
         const textFromFileLoaded = fileReader.result;
         this.csvContent = textFromFileLoaded;
+        console.log('CSV Loaded')
       }
 
       fileReader.readAsText(fileToRead, "UTF-8");

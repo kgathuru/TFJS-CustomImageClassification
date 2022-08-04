@@ -1,12 +1,16 @@
 <div class="container">
 
   <button mat-raised-button (click)="fileInput.click()">1. Load the CSV file containing list of training images</button>
-  <input hidden (change)="onFileSelect($event.target)" #fileInput type="file" id="file" name="myfile">
+  <input hidden (change)="onFileSelect($event)" #fileInput type="file" id="file" name="myfile">
   <button mat-raised-button (click)="loadCSV()">2. Prepare the Training Dataset</button>
   <button mat-raised-button (click)="train()">3. Train the AI Model</button>
 
 </div>
+<div class="container">
 
+  <mat-progress-bar mode="determinate" [value]="ProgressBarValue"></mat-progress-bar>
+
+</div>
 <div class="container">
 
   <mat-tab-group>
@@ -95,8 +99,6 @@
     <mat-tab label="Training Images">
 
       <div class="container">
-        <mat-progress-bar color="warn" class="progressbar" mode="determinate" [value]="ProgressBarValue">
-        </mat-progress-bar>
         <div *ngFor="let dt of tableRows; let i = index">
           <div class="trainingImages">
             <img width="224" height="224" src="{{dt.ImageSrc}}" [attr.id]="i" />
@@ -166,3 +168,5 @@
   </mat-tab-group>
 
 </div>
+
+<router-outlet></router-outlet>
