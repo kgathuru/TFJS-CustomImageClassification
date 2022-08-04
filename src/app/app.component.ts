@@ -58,8 +58,8 @@ export class AppComponent implements OnInit
 
   public ProgressBarValue: number;
   
-  @ViewChild(MatTable) table: MatTable<any>;
-  @ViewChild(MatPaginator) paginator: MatPaginator;
+  @ViewChild(MatTable, {static: false}) table: MatTable<any>;
+  @ViewChild(MatPaginator, {static: false}) paginator: MatPaginator;
  
   ngOnInit()
   {   
