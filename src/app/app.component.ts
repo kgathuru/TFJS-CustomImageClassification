@@ -7,6 +7,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatDividerModule } from '@angular/material/divider';
+import { Papa } from 'ngx-papaparse';
 
 //-------------------------------------------------------------
 // defines 'TrainingImageList' interface to store training dataset
@@ -185,47 +186,46 @@ export class AppComponent implements OnInit {
   // populates the MatTable rows and paginator
   // populates the targets as [1,0] uninfected, [0,1] parasitized
   //-------------------------------------------------------------
-  parseImages(batchSize) {
+  parseImages(batchSize: number) {
     if (this.isImagesListed) {
       this.isImagesListPerformed = false;
       return;
     }
 
-    let allTextLines = this.csvContent.split(/\r|\n|\r/);
+    this.papa.parse(this.csvContent,{
+      complete: (dataRows: any) => {
+          console.log('Parsed: ', dataRows);
+          
+          for (let i = 0; i < batchSize; i++) {
+            let dataRow: any = dataRows.data[i];
+            console.log('new row', i, dataRow);
+            this.tableRows.push({ ImageSrc: '', LabelX1: 0, LabelX2: 0, Class: '' });
 
-    const csvSeparator = ',';
-    const csvSeparator_2 = '.';
+            if (dataRow[1] == "Uninfected") {
+              this.label_x1.push(Number('1'));
+              this.label_x2.push(Number('0'));
+    
+              this.tableRows[i].ImageSrc = "../assets/" + dataRow[0];
+              this.tableRows[i].LabelX1 = 1;
+              this.tableRows[i].LabelX2 = 0;
+              this.tableRows[i].Class = "Uninfected";
+            }
+    
+            if (dataRow[1] == "Parasitized") {
+              this.label_x1.push(Number('0'));
+              this.label_x2.push(Number('1'));
+    
+              this.tableRows[i].ImageSrc = "../assets/" + dataRow[0];
+              this.tableRows[i].LabelX1 = 0;
+              this.tableRows[i].LabelX2 = 1;
+              this.tableRows[i].Class = "Parasitized";
+            }
 
-    for (let i = 0; i < batchSize; i++) {
-      // split content based on comma
-      const cols: string[] = allTextLines[i].split(csvSeparator);
-
-      this.tableRows.push({ ImageSrc: '', LabelX1: 0, LabelX2: 0, Class: '' });
-
-      if (cols[0].split(csvSeparator_2)[1] == "png") {
-
-        if (cols[1] == "Uninfected") {
-          this.label_x1.push(Number('1'));
-          this.label_x2.push(Number('0'));
-
-          this.tableRows[i].ImageSrc = "../assets/" + cols[0];
-          this.tableRows[i].LabelX1 = 1;
-          this.tableRows[i].LabelX2 = 0;
-          this.tableRows[i].Class = "Uninfected";
-        }
-
-        if (cols[1] == "Parasitized") {
-          this.label_x1.push(Number('0'));
-          this.label_x2.push(Number('1'));
-
-          this.tableRows[i].ImageSrc = "../assets/" + cols[0];
-          this.tableRows[i].LabelX1 = 0;
-          this.tableRows[i].LabelX2 = 1;
-          this.tableRows[i].Class = "Parasitized";
-        }
+          }
 
       }
-    }
+    });
+
     this.table.renderRows();
     this.dataSource.paginator = this.paginator;
 
